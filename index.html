@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PM Arsenal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#0B1626;
+  --panel:#101E33;
+  --panel-2:#0D1A2C;
+  --line:rgba(125,211,252,0.14);
+  --grid:rgba(125,211,252,0.05);
+  --ink:#E8F1FB;
+  --ink-dim:#7C93AE;
+  --accent:#7DD3FC;
+  --accent-soft:rgba(125,211,252,0.13);
+  --high:#F87171;
+  --med:#FBBF24;
+  --low:#34D399;
+  --mono:'JetBrains Mono',monospace;
+  --display:'Space Grotesk',sans-serif;
+  --body:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--body);
+  min-height:100vh;
+  padding:28px 20px 60px;
+}
+.app{max-width:1040px;margin:0 auto;}
+a{color:var(--accent);}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+.titleblock{
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  padding:22px 26px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-bottom:12px;
+  position:relative;
+}
+.corner{position:absolute;width:12px;height:12px;border-color:var(--accent);opacity:.6;}
+.corner.tl{top:-1px;left:-1px;border-top:1px solid;border-left:1px solid;}
+.corner.tr{top:-1px;right:-1px;border-top:1px solid;border-right:1px solid;}
+.corner.bl{bottom:-1px;left:-1px;border-bottom:1px solid;border-left:1px solid;}
+.corner.br{bottom:-1px;right:-1px;border-bottom:1px solid;border-right:1px solid;}
+
+.titleblock h1{
+  font-family:var(--display);
+  font-size:28px;
+  letter-spacing:0.5px;
+  margin:0 0 4px;
+  font-weight:700;
+}
+.titleblock p{
+  margin:0;
+  color:var(--ink-dim);
+  font-size:13.5px;
+  max-width:480px;
+}
+.plate{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--accent);
+  text-align:right;
+  line-height:1.6;
+  letter-spacing:0.5px;
+}
+.titlebar-actions{display:flex;gap:8px;align-items:center;}
+
+.about-panel{
+  display:none;
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  padding:20px 24px;
+  margin-bottom:12px;
+  font-size:13.5px;
+  line-height:1.7;
+  color:var(--ink-dim);
+  position:relative;
+}
+.about-panel.open{display:block;}
+.about-panel strong{color:var(--ink);}
+.about-panel .row{margin-top:14px;}
+
+.tabs{display:flex;gap:2px;margin-bottom:0;flex-wrap:wrap;}
+.tab{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:0.5px;
+  background:var(--panel-2);
+  color:var(--ink-dim);
+  border:1px solid var(--line);
+  border-bottom:none;
+  padding:11px 16px;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.tab:hover{color:var(--ink);}
+.tab.active{
+  background:var(--panel);
+  color:var(--accent);
+  border-color:var(--accent);
+  border-bottom:1px solid var(--panel);
+  margin-bottom:-1px;
+  position:relative;
+  z-index:2;
+}
+
+.sheet{display:none;border:1px solid var(--line);background:var(--panel);padding:26px;position:relative;min-height:420px;}
+.sheet.active{display:block;}
+
+.sheet-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap;gap:8px;}
+.sheet-head h2{font-family:var(--display);font-size:19px;margin:0;font-weight:600;}
+.sheet-num{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:1px;}
+.sheet-desc{color:var(--ink-dim);font-size:13px;margin:0 0 18px;line-height:1.6;max-width:640px;}
+
+label{display:block;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;}
+textarea, input, select{
+  width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
+  font-family:var(--body);font-size:13.5px;padding:11px 12px;border-radius:2px;
+}
+textarea{min-height:120px;resize:vertical;}
+textarea:focus, input:focus, select:focus{outline:1px solid var(--accent);border-color:var(--accent);}
+
+button{
+  font-family:var(--mono);font-size:12px;letter-spacing:0.5px;background:var(--accent-soft);
+  color:var(--accent);border:1px solid var(--accent);padding:10px 18px;cursor:pointer;
+  border-radius:2px;transition:background .15s ease;display:inline-flex;align-items:center;gap:8px;
+}
+button:hover{background:rgba(125,211,252,0.25);}
+button:disabled{opacity:0.4;cursor:not-allowed;}
+button.ghost{background:transparent;color:var(--ink-dim);border-color:var(--line);}
+button.ghost:hover{color:var(--ink);border-color:var(--ink-dim);}
+button.warn{border-color:var(--high);color:var(--high);}
+button.warn:hover{background:rgba(248,113,113,0.15);}
+button.small{padding:6px 12px;font-size:11px;}
+
+.row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+.status{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);}
+.status.err{color:var(--high);}
+
+.spinner{
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid rgba(125,211,252,0.25);border-top-color:var(--accent);
+  animation:spin .7s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.card{border:1px solid var(--line);background:var(--panel-2);padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--ink-dim);}
+.card.high{border-left-color:var(--high);}
+.card.medium{border-left-color:var(--med);}
+.card.low{border-left-color:var(--low);}
+.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:10px;flex-wrap:wrap;}
+.card-title{font-weight:600;font-size:14px;}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:0.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;border:1px solid currentColor;}
+.badge.high{color:var(--high);}
+.badge.medium{color:var(--med);}
+.badge.low{color:var(--low);}
+.card p{margin:4px 0 0;font-size:13px;color:var(--ink-dim);line-height:1.55;}
+.card .label{color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:0.5px;text-transform:uppercase;margin-top:8px;display:block;}
+
+.output-box{border:1px solid var(--line);background:var(--panel-2);padding:16px 18px;white-space:pre-wrap;font-size:13.5px;line-height:1.65;color:var(--ink);min-height:80px;}
+
+table{width:100%;border-collapse:collapse;margin-top:8px;}
+th{font-family:var(--mono);font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+td{padding:10px 10px;border-bottom:1px solid rgba(125,211,252,0.06);font-size:13px;vertical-align:middle;}
+.bar-wrap{width:120px;height:8px;background:var(--panel-2);border:1px solid var(--line);position:relative;overflow:hidden;}
+.bar-fill{height:100%;background:var(--low);}
+.bar-fill.over{background:var(--high);}
+.bar-fill.warn{background:var(--med);}
+.pct{font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin-left:8px;}
+.mini{background:transparent;border:1px solid var(--line);color:var(--ink-dim);padding:4px 8px;font-size:11px;}
+.mini:hover{color:var(--high);border-color:var(--high);}
+.editable{background:transparent;border:1px solid transparent;color:var(--ink);width:52px;padding:3px 5px;font-family:var(--mono);font-size:12.5px;}
+.editable:hover, .editable:focus{border-color:var(--line);background:var(--panel);}
+.addrow{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.addrow input{flex:1;min-width:90px;}
+.board-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.board-row select{width:auto;min-width:160px;}
+.board-row input{width:140px;}
+
+.history-block{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;}
+.history-block h3{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;}
+.history-item{border:1px solid var(--line);background:var(--panel-2);padding:10px 14px;margin-bottom:6px;cursor:pointer;font-size:12.5px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.history-item:hover{border-color:var(--accent);}
+.history-item .ts{color:var(--ink-dim);font-family:var(--mono);font-size:11px;}
+.history-item .sum{color:var(--ink);}
+.history-detail{border:1px dashed var(--line);background:var(--panel-2);padding:14px 16px;margin-top:8px;font-size:13px;white-space:pre-wrap;line-height:1.55;}
+
+.chat{border:1px solid var(--line);background:var(--panel-2);min-height:280px;max-height:380px;overflow-y:auto;padding:16px;margin-bottom:12px;}
+.msg{margin-bottom:14px;max-width:80%;}
+.msg.user{margin-left:auto;text-align:right;}
+.msg .who{font-family:var(--mono);font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+.msg .bubble{display:inline-block;text-align:left;padding:10px 13px;font-size:13.5px;line-height:1.55;border:1px solid var(--line);}
+.msg.ai .bubble{background:var(--panel);}
+.msg.user .bubble{background:var(--accent-soft);border-color:var(--accent);}
+.feedback{border:1px dashed var(--med);background:rgba(251,191,36,0.06);padding:16px 18px;margin-top:14px;white-space:pre-wrap;font-size:13.5px;line-height:1.6;}
+.feedback .label{font-family:var(--mono);font-size:10.5px;color:var(--med);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;}
+
+.empty{color:var(--ink-dim);font-size:13px;font-family:var(--mono);padding:14px 0;}
+.custom-scenario{margin-top:10px;display:none;}
+.custom-scenario.open{display:block;}
+
+@media (max-width:640px){
+  .titleblock{flex-direction:column;align-items:flex-start;}
+  .plate{text-align:left;}
+  .sheet{padding:18px;}
+  .tab{padding:9px 11px;font-size:11px;}
+  table, thead, tbody, th, td, tr{display:block;}
+  thead{display:none;}
+  td{border-bottom:none;padding:4px 0;}
+  tr{border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:6px;}
+  .bar-wrap{width:100px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="titleblock">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div>
+      <h1>PM ARSENAL</h1>
+      <p>Four field tools for the parts of the job the software forgot: seeing risk early, briefing up, balancing load, and holding the room.</p>
+    </div>
+    <div class="titlebar-actions">
+      <div class="plate">DRAFTED BY: HAILEY CUMMINGS<br>ROLE: SENIOR PROJECT MANAGER<br>REV: 02</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin:0 0 12px;">
+    <button class="ghost small" onclick="toggleAbout()">About this tool</button>
+    <button class="ghost small" onclick="loadDemo()">Load demo data</button>
+  </div>
+
+  <div class="about-panel" id="about-panel">
+    <p><strong>Why this exists.</strong> Most PM software treats projects as static checklists — it tracks tasks, not uncertainty. Four gaps show up repeatedly in how modern PM tools fall short: they don't surface risk patterns early, they don't translate project health into language executives actually read, they measure workload by task count instead of real capacity, and they offer no way to practice the hard conversations that used to be learned by shadowing a veteran in the room. This tool addresses each directly, using AI where it adds real judgment (risk analysis, briefing, roleplay) and plain tracking where it doesn't need to be smarter than a spreadsheet (capacity).</p>
+    <div class="row"><button class="ghost small" onclick="toggleAbout()">Close</button></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="1">01 &nbsp;RISK RADAR</div>
+    <div class="tab" data-tab="2">02 &nbsp;EXEC BRIEF</div>
+    <div class="tab" data-tab="3">03 &nbsp;CAPACITY GRID</div>
+    <div class="tab" data-tab="4">04 &nbsp;SCENARIO ROOM</div>
+  </div>
+
+  <!-- SHEET 01 -->
+  <div class="sheet active" id="sheet-1">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="sheet-head"><h2>Risk Radar</h2><span class="sheet-num">SHEET 01 / 04</span></div>
+    <p class="sheet-desc">Paste raw project notes, standup updates, or status emails. Radar scans for risk patterns before they surface as timeline or budget problems — not just what's wrong, but why it matters and what to do about it.</p>
+    <label>Project notes / status</label>
+    <textarea id="risk-input" placeholder="e.g. Dev team says API integration is 'mostly done' but QA hasn't started. Client asked for two extra fields on the dashboard last week, said it was 'quick.' Vendor invoice for hosting still not approved by finance..."></textarea>
+    <div class="row">
+      <button id="risk-btn" onclick="scanRisk()">Scan for Risk</button>
+      <button class="ghost" id="risk-retry" style="display:none;" onclick="scanRisk()">Retry</button>
+      <span class="status" id="risk-status"></span>
+    </div>
+    <div id="risk-output" style="margin-top:20px;"></div>
+
+    <div class="history-block">
+      <h3>Scan history</h3>
+      <div id="risk-history"></div>
+    </div>
+  </div>
+
+  <!-- SHEET 02 -->
+  <div class="sheet" id="sheet-2">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="sheet-head"><h2>Exec Brief</h2><span class="sheet-num">SHEET 02 / 04</span></div>
+    <p class="sheet-desc">Drop in messy raw notes. Get back the version your audience actually reads — clear status, plain-language risk, and what you need from them, without the filler.</p>
+    <label>Audience</label>
+    <select id="brief-audience">
+      <option value="VP or executive sponsor, busy and results-oriented">VP / Executive Sponsor</option>
+      <option value="external client, expects transparency and reassurance without jargon">Client</option>
+      <option value="board of directors, wants strategic framing and minimal operational detail">Board</option>
+    </select>
+    <label style="margin-top:14px;">Raw notes</label>
+    <textarea id="brief-input" placeholder="e.g. We're basically on track but the vendor is slow, timeline might slip a week, budget is fine so far, need sign off on the new scope item from last week's call..."></textarea>
+    <div class="row">
+      <button id="brief-btn" onclick="draftBrief()">Draft Brief</button>
+      <button class="ghost" id="brief-retry" style="display:none;" onclick="draftBrief()">Retry</button>
+      <button class="ghost" id="brief-copy" onclick="copyBrief()" style="display:none;">Copy</button>
+      <span class="status" id="brief-status"></span>
+    </div>
+    <div class="output-box" id="brief-output" style="margin-top:20px;display:none;"></div>
+
+    <div class="history-block">
+      <h3>Brief history</h3>
+      <div id="brief-history"></div>
+    </div>
+  </div>
+
+  <!-- SHEET 03 -->
+  <div class="sheet" id="sheet-3">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="sheet-head"><h2>Capacity Grid</h2><span class="sheet-num">SHEET 03 / 04</span></div>
+    <p class="sheet-desc">Real workload, not task counts. Enter hours allocated vs. hours available per person to see overallocation before it becomes burnout or a missed deadline. Click any number to edit it. Saved automatically to this device.</p>
+
+    <div class="board-row">
+      <label style="margin:0;">Board</label>
+      <select id="board-select" onchange="switchBoard()"></select>
+      <input id="new-board-name" placeholder="New board name">
+      <button class="ghost small" onclick="addBoard()">New board</button>
+      <button class="warn small" onclick="deleteBoard()">Delete board</button>
+    </div>
+
+    <table>
+      <thead><tr><th>Name</th><th>Allocated (hrs/wk)</th><th>Available (hrs/wk)</th><th>Load</th><th></th></tr></thead>
+      <tbody id="capacity-body"></tbody>
+    </table>
+    <div class="addrow">
+      <input id="cap-name" placeholder="Name">
+      <input id="cap-alloc" type="number" placeholder="Allocated hrs" min="0">
+      <input id="cap-avail" type="number" placeholder="Available hrs" min="0" value="40">
+      <button onclick="addCapacityRow()">Add</button>
+    </div>
+    <div class="row">
+      <button class="ghost" onclick="saveSnapshot()">Save snapshot</button>
+      <span class="status" id="cap-status"></span>
+    </div>
+
+    <div class="history-block">
+      <h3>Snapshot history — this board</h3>
+      <div id="cap-history"></div>
+    </div>
+  </div>
+
+  <!-- SHEET 04 -->
+  <div class="sheet" id="sheet-4">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="sheet-head"><h2>Scenario Room</h2><span class="sheet-num">SHEET 04 / 04</span></div>
+    <p class="sheet-desc">Practice the conversation before you're in it. Pick a scenario, the room plays the counterpart — stay in it as long as you want, then request field notes on how you handled it.</p>
+    <label>Scenario</label>
+    <select id="scenario-select" onchange="onScenarioChange()">
+      <option value="timeline">Timeline Pushback — client upset about a 2-week delay, questioning your competence</option>
+      <option value="scope">Scope Creep — stakeholder wants "one more feature" a week before launch</option>
+      <option value="vendor">Underperforming Vendor — dev partner keeps missing deliverables</option>
+      <option value="budget">Budget Overrun — you need to tell a VP sponsor costs are 15% over</option>
+      <option value="custom">Custom scenario — describe your own</option>
+    </select>
+    <div class="custom-scenario" id="custom-scenario-box">
+      <label style="margin-top:14px;">Describe the counterpart and situation</label>
+      <textarea id="custom-scenario-text" placeholder="e.g. My actual client, a hospital operations director, is upset that our EHR integration testing found new compliance issues two weeks before go-live..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="chat" id="chat-window"></div>
+    <div class="row">
+      <input id="chat-input" placeholder="Type your response..." style="flex:1;" onkeydown="if(event.key==='Enter')sendChat()">
+      <button id="chat-send" onclick="sendChat()">Send</button>
+      <button class="ghost" onclick="getFeedback()">Get Field Notes</button>
+      <button class="ghost" onclick="resetChat()">Reset</button>
+    </div>
+    <span class="status" id="chat-status"></span>
+    <div id="feedback-box"></div>
+
+    <div class="history-block">
+      <h3>Past sessions</h3>
+      <div id="scenario-history"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- tabs ----------
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('sheet-'+t.dataset.tab).classList.add('active');
+  });
+});
+function toggleAbout(){
+  document.getElementById('about-panel').classList.toggle('open');
+}
+
+// ---------- API helper ----------
+async function callClaude(messages, system){
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, system: system, messages: messages })
+  });
+  if(!response.ok) throw new Error("API error");
+  const data = await response.json();
+  if(!data.content) throw new Error("No response");
+  return data.content.map(b=>b.text||"").join("\n");
+}
+function stripFences(t){ return t.replace(/```json/g,'').replace(/```/g,'').trim(); }
+function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtTs(ts){ return new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+async function storageGet(key){
+  try{ const r = window.localStorage.getItem(key); return r ? JSON.parse(r) : null; }
+  catch(e){ return null; }
+}
+async function storageSet(key, value){
+  try{ window.localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch(e){ return false; }
+}
+
+// ---------- Sheet 01: Risk Radar ----------
+let riskHistory = [];
+async function scanRisk(){
+  const input = document.getElementById('risk-input').value.trim();
+  const out = document.getElementById('risk-output');
+  const status = document.getElementById('risk-status');
+  const btn = document.getElementById('risk-btn');
+  const retry = document.getElementById('risk-retry');
+  if(!input){ status.textContent = 'Add some notes first.'; status.className='status'; return; }
+  btn.disabled = true; retry.style.display='none';
+  status.innerHTML = '<span class="spinner"></span> Scanning...'; status.className='status';
+  try{
+    const system = `You are a senior project management risk analyst. Given raw project notes, identify 2-5 real risks - not generic PM advice, but specific to what's described. Output ONLY a JSON array, no markdown, no preamble. Each item: {"title": short risk name, "severity": "High"|"Medium"|"Low", "likelihood": "High"|"Medium"|"Low", "signal": one sentence on why this is a risk based on the notes, "mitigation": one concrete, specific action to take}.`;
+    const text = await callClaude([{role:"user", content: input}], system);
+    const risks = JSON.parse(stripFences(text));
+    out.innerHTML = risks.map(r=>`
+      <div class="card ${r.severity.toLowerCase()}">
+        <div class="card-top">
+          <span class="card-title">${escapeHtml(r.title)}</span>
+          <span class="badge ${r.severity.toLowerCase()}">${r.severity} sev / ${r.likelihood} likely</span>
+        </div>
+        <p>${escapeHtml(r.signal)}</p>
+        <span class="label">Mitigation</span>
+        <p>${escapeHtml(r.mitigation)}</p>
+      </div>
+    `).join('');
+    status.textContent = risks.length + ' risk(s) flagged.';
+    riskHistory.unshift({ts: Date.now(), input, risks});
+    riskHistory = riskHistory.slice(0,20);
+    await storageSet('risk-history', riskHistory);
+    renderRiskHistory();
+  }catch(e){
+    status.textContent = 'Something went wrong — try again.';
+    status.className='status err';
+    retry.style.display='inline-flex';
+  }
+  btn.disabled = false;
+}
+function renderRiskHistory(){
+  const box = document.getElementById('risk-history');
+  if(riskHistory.length===0){ box.innerHTML = '<div class="empty">No scans yet.</div>'; return; }
+  box.innerHTML = riskHistory.map((h,i)=>`
+    <div class="history-item" onclick="toggleRiskDetail(${i})">
+      <span class="sum">${h.risks.length} risk(s) — ${escapeHtml(h.input.slice(0,60))}${h.input.length>60?'...':''}</span>
+      <span class="ts">${fmtTs(h.ts)}</span>
+    </div>
+    <div class="history-detail" id="risk-detail-${i}" style="display:none;">${h.risks.map(r=>`• [${r.severity}] ${escapeHtml(r.title)} — ${escapeHtml(r.mitigation)}`).join('\n')}</div>
+  `).join('');
+}
+function toggleRiskDetail(i){
+  const el = document.getElementById('risk-detail-'+i);
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+// ---------- Sheet 02: Exec Brief ----------
+let briefHistory = [];
+async function draftBrief(){
+  const input = document.getElementById('brief-input').value.trim();
+  const audience = document.getElementById('brief-audience').value;
+  const out = document.getElementById('brief-output');
+  const status = document.getElementById('brief-status');
+  const btn = document.getElementById('brief-btn');
+  const retry = document.getElementById('brief-retry');
+  const copyBtn = document.getElementById('brief-copy');
+  if(!input){ status.textContent = 'Add some notes first.'; status.className='status'; return; }
+  btn.disabled = true; retry.style.display='none'; out.style.display='none';
+  status.innerHTML = '<span class="spinner"></span> Drafting...'; status.className='status';
+  try{
+    const system = `You are a senior PM writing a status brief from raw notes, for this audience: ${audience}. Output plain text (no markdown headers), structured as: STATUS (one line: on track / at risk / off track), then short sections covering progress, risk, and what's needed from the reader. Match tone and detail level to the audience described. Keep it tight and specific - no filler, no hedging.`;
+    const text = await callClaude([{role:"user", content: input}], system);
+    out.textContent = text.trim();
+    out.style.display = 'block';
+    copyBtn.style.display = 'inline-flex';
+    status.textContent = 'Ready.';
+    briefHistory.unshift({ts: Date.now(), audience, input, output: text.trim()});
+    briefHistory = briefHistory.slice(0,20);
+    await storageSet('brief-history', briefHistory);
+    renderBriefHistory();
+  }catch(e){
+    status.textContent = 'Something went wrong — try again.';
+    status.className='status err';
+    retry.style.display='inline-flex';
+  }
+  btn.disabled = false;
+}
+function copyBrief(){
+  navigator.clipboard.writeText(document.getElementById('brief-output').textContent);
+  document.getElementById('brief-status').textContent = 'Copied.';
+}
+function renderBriefHistory(){
+  const box = document.getElementById('brief-history');
+  if(briefHistory.length===0){ box.innerHTML = '<div class="empty">No briefs yet.</div>'; return; }
+  box.innerHTML = briefHistory.map((h,i)=>`
+    <div class="history-item" onclick="toggleBriefDetail(${i})">
+      <span class="sum">${escapeHtml(h.input.slice(0,60))}${h.input.length>60?'...':''}</span>
+      <span class="ts">${fmtTs(h.ts)}</span>
+    </div>
+    <div class="history-detail" id="brief-detail-${i}" style="display:none;">${escapeHtml(h.output)}</div>
+  `).join('');
+}
+function toggleBriefDetail(i){
+  const el = document.getElementById('brief-detail-'+i);
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+// ---------- Sheet 03: Capacity Grid (multi-board + editable + snapshots) ----------
+let boards = {};
+let currentBoard = 'My Team';
+let capHistoryAll = {};
+
+async function loadCapacity(){
+  boards = await storageGet('capacity-boards') || { 'My Team': [] };
+  capHistoryAll = await storageGet('capacity-history') || {};
+  const savedCurrent = await storageGet('capacity-current');
+  currentBoard = (savedCurrent && boards[savedCurrent]) ? savedCurrent : Object.keys(boards)[0];
+  renderBoardSelect();
+  renderCapacity();
+  renderCapHistory();
+}
+function renderBoardSelect(){
+  const sel = document.getElementById('board-select');
+  sel.innerHTML = Object.keys(boards).map(b=>`<option value="${escapeHtml(b)}" ${b===currentBoard?'selected':''}>${escapeHtml(b)}</option>`).join('');
+}
+function switchBoard(){
+  currentBoard = document.getElementById('board-select').value;
+  storageSet('capacity-current', currentBoard);
+  renderCapacity();
+  renderCapHistory();
+}
+function addBoard(){
+  const name = document.getElementById('new-board-name').value.trim();
+  const status = document.getElementById('cap-status');
+  if(!name){ status.textContent='Name the new board first.'; return; }
+  if(boards[name]){ status.textContent='A board with that name already exists.'; return; }
+  boards[name] = [];
+  currentBoard = name;
+  document.getElementById('new-board-name').value='';
+  storageSet('capacity-boards', boards);
+  storageSet('capacity-current', currentBoard);
+  renderBoardSelect(); renderCapacity(); renderCapHistory();
+  status.textContent = 'Board created.';
+}
+function deleteBoard(){
+  const keys = Object.keys(boards);
+  if(keys.length<=1){ document.getElementById('cap-status').textContent='At least one board must remain.'; return; }
+  delete boards[currentBoard];
+  delete capHistoryAll[currentBoard];
+  currentBoard = Object.keys(boards)[0];
+  storageSet('capacity-boards', boards);
+  storageSet('capacity-history', capHistoryAll);
+  storageSet('capacity-current', currentBoard);
+  renderBoardSelect(); renderCapacity(); renderCapHistory();
+}
+function renderCapacity(){
+  const body = document.getElementById('capacity-body');
+  const data = boards[currentBoard] || [];
+  if(data.length===0){
+    body.innerHTML = `<tr><td colspan="5" class="empty">No one on this board yet — add your first team member below.</td></tr>`;
+    return;
+  }
+  body.innerHTML = data.map((p,i)=>{
+    const pct = p.avail>0 ? Math.round((p.alloc/p.avail)*100) : 0;
+    let cls = ''; if(pct>100) cls='over'; else if(pct>=85) cls='warn';
+    return `<tr>
+      <td>${escapeHtml(p.name)}</td>
+      <td><input class="editable" type="number" value="${p.alloc}" onchange="editCap(${i},'alloc',this.value)"></td>
+      <td><input class="editable" type="number" value="${p.avail}" onchange="editCap(${i},'avail',this.value)"></td>
+      <td><div style="display:flex;align-items:center;"><div class="bar-wrap"><div class="bar-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div><span class="pct">${pct}%${pct>100?' OVER':''}</span></div></td>
+      <td><button class="mini" onclick="removeCapacityRow(${i})">Remove</button></td>
+    </tr>`;
+  }).join('');
+}
+function editCap(i, field, value){
+  boards[currentBoard][i][field] = parseFloat(value) || 0;
+  storageSet('capacity-boards', boards);
+  renderCapacity();
+}
+function addCapacityRow(){
+  const name = document.getElementById('cap-name').value.trim();
+  const alloc = parseFloat(document.getElementById('cap-alloc').value);
+  const avail = parseFloat(document.getElementById('cap-avail').value);
+  const status = document.getElementById('cap-status');
+  if(!name || isNaN(alloc) || isNaN(avail)){ status.textContent = 'Fill in name, allocated, and available hours.'; return; }
+  boards[currentBoard].push({name, alloc, avail});
+  document.getElementById('cap-name').value='';
+  document.getElementById('cap-alloc').value='';
+  document.getElementById('cap-avail').value='40';
+  status.textContent = 'Saved.';
+  renderCapacity();
+  storageSet('capacity-boards', boards);
+}
+function removeCapacityRow(i){
+  boards[currentBoard].splice(i,1);
+  renderCapacity();
+  storageSet('capacity-boards', boards);
+}
+function saveSnapshot(){
+  const data = boards[currentBoard] || [];
+  if(data.length===0){ document.getElementById('cap-status').textContent='Nothing to snapshot yet.'; return; }
+  if(!capHistoryAll[currentBoard]) capHistoryAll[currentBoard] = [];
+  capHistoryAll[currentBoard].unshift({ts: Date.now(), data: JSON.parse(JSON.stringify(data))});
+  capHistoryAll[currentBoard] = capHistoryAll[currentBoard].slice(0,15);
+  storageSet('capacity-history', capHistoryAll);
+  renderCapHistory();
+  document.getElementById('cap-status').textContent = 'Snapshot saved.';
+}
+function renderCapHistory(){
+  const box = document.getElementById('cap-history');
+  const hist = capHistoryAll[currentBoard] || [];
+  if(hist.length===0){ box.innerHTML = '<div class="empty">No snapshots saved for this board yet.</div>'; return; }
+  box.innerHTML = hist.map(h=>{
+    const avgPct = h.data.length ? Math.round(h.data.reduce((s,p)=>s+(p.avail>0?(p.alloc/p.avail)*100:0),0)/h.data.length) : 0;
+    const overCount = h.data.filter(p=>p.avail>0 && (p.alloc/p.avail)>1).length;
+    return `<div class="history-item"><span class="sum">${h.data.length} people — avg load ${avgPct}%${overCount?` — ${overCount} over capacity`:''}</span><span class="ts">${fmtTs(h.ts)}</span></div>`;
+  }).join('');
+}
+
+// ---------- Sheet 04: Scenario Room ----------
+const scenarios = {
+  timeline: { label:"Timeline Pushback", system:`You are roleplaying as a frustrated client in a project management training simulation. Your project's launch date just moved back 2 weeks. You are upset, a little sharp, and questioning whether the PM you're talking to actually has control of the project. Stay firmly in character - respond only as the client, 2-4 sentences, reacting realistically. Start already frustrated.` },
+  scope: { label:"Scope Creep Request", system:`You are roleplaying as a stakeholder in a project management training simulation. It's one week before launch and you're asking the PM to add "just one more feature," insisting it's small even though it isn't. Stay in character, persistent and a little dismissive of timeline/scope concerns. Respond only as this stakeholder, 2-4 sentences. Start by making the request.` },
+  vendor: { label:"Underperforming Vendor", system:`You are roleplaying as a vendor account lead in a project management training simulation. Your team has missed the last two deliverable deadlines. You are polite but defensive, tend to make excuses, avoid firm dates unless pushed. Stay in character, 2-4 sentences. Wait for the PM to open.` },
+  budget: { label:"Budget Overrun Disclosure", system:`You are roleplaying as a VP sponsor in a project management training simulation. The PM is about to tell you the project is 15% over budget. You are busy, results-oriented, ask pointed questions, not automatically forgiving. Stay in character, 2-4 sentences. Wait for the PM to open.` }
+};
+let chatHistory = [];
+let scenarioSessions = [];
+
+function onScenarioChange(){
+  const key = document.getElementById('scenario-select').value;
+  document.getElementById('custom-scenario-box').classList.toggle('open', key==='custom');
+  resetChat();
+}
+function currentScenarioSystem(){
+  const key = document.getElementById('scenario-select').value;
+  if(key==='custom'){
+    const desc = document.getElementById('custom-scenario-text').value.trim();
+    return `You are roleplaying as a counterpart in a project management training simulation, based on this situation described by the PM: "${desc}". Infer a realistic persona and stance from this description and stay firmly in character - do not break character, do not coach. Respond only as this counterpart, 2-4 sentences per turn.`;
+  }
+  return scenarios[key].system;
+}
+function currentScenarioLabel(){
+  const key = document.getElementById('scenario-select').value;
+  return key==='custom' ? 'Custom: '+document.getElementById('custom-scenario-text').value.slice(0,40) : scenarios[key].label;
+}
+function resetChat(){
+  chatHistory = [];
+  document.getElementById('chat-window').innerHTML = '';
+  document.getElementById('feedback-box').innerHTML = '';
+  document.getElementById('chat-status').textContent = 'New scenario loaded. Open the conversation when ready.';
+  document.getElementById('chat-status').className = 'status';
+}
+function renderChat(){
+  const win = document.getElementById('chat-window');
+  win.innerHTML = chatHistory.map(m=>`
+    <div class="msg ${m.role==='user'?'user':'ai'}">
+      <div class="who">${m.role==='user'?'You':'Counterpart'}</div>
+      <div class="bubble">${escapeHtml(m.content)}</div>
+    </div>`).join('');
+  win.scrollTop = win.scrollHeight;
+}
+async function sendChat(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  const status = document.getElementById('chat-status');
+  const sendBtn = document.getElementById('chat-send');
+  if(!text) return;
+  if(document.getElementById('scenario-select').value==='custom' && !document.getElementById('custom-scenario-text').value.trim()){
+    status.textContent = 'Describe the custom scenario first.'; status.className='status err'; return;
+  }
+  chatHistory.push({role:"user", content:text});
+  input.value='';
+  renderChat();
+  sendBtn.disabled = true;
+  status.innerHTML = '<span class="spinner"></span> Counterpart is responding...'; status.className='status';
+  try{
+    const apiMessages = chatHistory.map(m=>({role: m.role==='ai'?'assistant':'user', content: m.content}));
+    const reply = await callClaude(apiMessages, currentScenarioSystem());
+    chatHistory.push({role:"ai", content: reply.trim()});
+    renderChat();
+    status.textContent = '';
+  }catch(e){
+    status.textContent = 'Something went wrong — try sending again.';
+    status.className = 'status err';
+    chatHistory.pop();
+  }
+  sendBtn.disabled = false;
+}
+async function getFeedback(){
+  const status = document.getElementById('chat-status');
+  const box = document.getElementById('feedback-box');
+  if(chatHistory.filter(m=>m.role==='user').length===0){ status.textContent='Have at least one exchange before requesting feedback.'; return; }
+  status.innerHTML = '<span class="spinner"></span> Reviewing the conversation...'; status.className='status';
+  try{
+    const transcript = chatHistory.map(m=>`${m.role==='user'?'PM':'Counterpart'}: ${m.content}`).join('\n');
+    const system = `You are a senior project management coach reviewing a practice conversation. Give direct, specific field notes on how the PM (labeled "PM") handled it: what worked, what to sharpen, one concrete phrase or approach for next time. 4-6 sentences, no fluff, tied to specific moments in the transcript.`;
+    const feedback = (await callClaude([{role:"user", content: transcript}], system)).trim();
+    box.innerHTML = `<div class="feedback"><span class="label">Field Notes</span>${escapeHtml(feedback)}</div>`;
+    status.textContent = '';
+    scenarioSessions.unshift({ts: Date.now(), label: currentScenarioLabel(), transcript, feedback});
+    scenarioSessions = scenarioSessions.slice(0,20);
+    await storageSet('scenario-sessions', scenarioSessions);
+    renderScenarioHistory();
+  }catch(e){
+    status.textContent = 'Could not generate feedback — try again.';
+    status.className = 'status err';
+  }
+}
+function renderScenarioHistory(){
+  const box = document.getElementById('scenario-history');
+  if(scenarioSessions.length===0){ box.innerHTML = '<div class="empty">No completed sessions yet.</div>'; return; }
+  box.innerHTML = scenarioSessions.map((h,i)=>`
+    <div class="history-item" onclick="toggleScenarioDetail(${i})">
+      <span class="sum">${escapeHtml(h.label)}</span>
+      <span class="ts">${fmtTs(h.ts)}</span>
+    </div>
+    <div class="history-detail" id="scenario-detail-${i}" style="display:none;">${escapeHtml(h.transcript)}\n\n— FIELD NOTES —\n${escapeHtml(h.feedback)}</div>
+  `).join('');
+}
+function toggleScenarioDetail(i){
+  const el = document.getElementById('scenario-detail-'+i);
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+// ---------- Demo data ----------
+function loadDemo(){
+  document.getElementById('risk-input').value = "Dev team says the API integration is 'mostly done' but QA hasn't started yet and launch is in 9 days. Client requested two extra dashboard fields last week during a call, said it was 'quick' - not yet scoped or estimated. Hosting vendor invoice still sitting with finance for approval, was due last Friday. Two of five engineers are also supporting another release this sprint.";
+  document.getElementById('brief-audience').value = "VP or executive sponsor, busy and results-oriented";
+  document.getElementById('brief-input').value = "We're mostly on track. Vendor's a bit slow on hosting approval, might push launch by a few days. Budget's fine so far. Need a decision from you on whether we absorb the client's new dashboard field request into this release or push it to phase 2.";
+  if(!boards['Demo Team']){
+    boards['Demo Team'] = [
+      {name:'Alex R.', alloc:34, avail:40},
+      {name:'Jordan P.', alloc:46, avail:40},
+      {name:'Sam T.', alloc:22, avail:40},
+      {name:'Chris L.', alloc:40, avail:32}
+    ];
+    storageSet('capacity-boards', boards);
+  }
+  currentBoard = 'Demo Team';
+  storageSet('capacity-current', currentBoard);
+  renderBoardSelect(); renderCapacity(); renderCapHistory();
+  document.getElementById('scenario-select').value = 'timeline';
+  onScenarioChange();
+  document.getElementById('about-panel').classList.remove('open');
+  document.querySelectorAll('.tab')[0].click();
+}
+
+// ---------- init ----------
+(async function init(){
+  riskHistory = await storageGet('risk-history') || [];
+  briefHistory = await storageGet('brief-history') || [];
+  scenarioSessions = await storageGet('scenario-sessions') || [];
+  renderRiskHistory();
+  renderBriefHistory();
+  renderScenarioHistory();
+  await loadCapacity();
+  resetChat();
+})();
+</script>
+</body>
+</html>
